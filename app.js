@@ -1,5 +1,4 @@
-// It should display a list item that says 'Click here to add your first To-do' when the app loads with nothing in the store.
-// It should switch to edit mode on a Todo when a user clicks on its text.
+// It should display a list item that says 'Click here to add your first To-do' when the app loads with nothing in the store. DONE// It should switch to edit mode on a Todo when a user clicks on its text.
 // It should save current Todo and create another Todo bullet at same level when enter key is pressed while in edit mode
 // It should create a sub-Todo under current Todo when tab is pressed in edit mode
 // It should discard changes when escape is pressed in edit mode
@@ -74,7 +73,12 @@
             todos.forEach(function (element){    
                 var todoLi = document.createElement('li');
                 todoLi.setAttribute('data-id', element.uuid);
-                todoLi.innerHTML = element.title;
+                todoLi.innerHTML = `<div class= "view">
+                    <input class= "toggle" type= "checkbox">
+                    <label>${element.title}</label>
+                    <button class="delete">Delete</button>
+                </div>
+                <input class= "edit" value= "${element.title}">`
                 ul.appendChild(todoLi);
             });
 
