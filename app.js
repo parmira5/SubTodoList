@@ -59,6 +59,7 @@
                 });
             }
             this.render(this.todos);
+            this.bindEvents();
         },
 
         render: function (todoArray){
@@ -88,6 +89,18 @@
         updateDom: function (list) {
             var container = document.getElementById('app-container');
             container.innerHTML = list.outerHTML;
+        },
+
+        edit: function (e) {
+            var liNode = e.target.parentNode.parentNode;
+            liNode.classList.add('editing');
+            var input = liNode.querySelector('edit');
+
+
+        },
+
+        bindEvents: function() {
+            document.getElementById('app-container').addEventListener('dblclick', this.edit.bind(this));
         }
     }
     App.init();

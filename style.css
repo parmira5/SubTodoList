@@ -90,6 +90,15 @@ body{
       flex-direction: column;
   }
 
-  .edit {
+  #app-container ul li .edit {
     display: none;
   }
+
+  #app-container ul .editing .view {
+    display: none;
+    color: white;
+  }
+
+  #app-container ul .editing .edit {
+    display: block;
+  } 
