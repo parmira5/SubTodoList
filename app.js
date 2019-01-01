@@ -94,13 +94,63 @@
         edit: function (e) {
             var liNode = e.target.parentNode.parentNode;
             liNode.classList.add('editing');
-            var input = liNode.querySelector('edit');
+            var input = liNode.querySelector('input.edit');
+            input.focus();  
 
 
         },
 
+        editKeyUp: function(e){
+            
+            if (e.which === ENTER_KEY){
+                e.target.blur();
+            }
+
+            if (e.which === TAB_KEY) {
+
+            }
+
+            if (e.whcih === ESCAPE_KEY) {
+
+            }
+        },
+
+        update: function(e){
+            var elem = e.target;
+            var value = elem.value.trim();
+
+            this.todos[this.indexFromEl(elem)].title = value;
+            this.render(this.todos);
+
+        },
+
+        indexFromEl: function(el){
+            for (let i = 0; i < this.todos.length; i++){
+                if (this.todos[i].uuid === el.parentNode.getAttribute('data-id')){
+                    return i;
+                }
+            }
+        },
+
         bindEvents: function() {
-            document.getElementById('app-container').addEventListener('dblclick', this.edit.bind(this));
+            document.getElementById('app-container').addEventListener('dblclick', function (e) {
+                if (e.target.tagName === 'LABEL'){
+                    this.edit.call(this, e);
+                }
+            }.bind(this));
+
+            document.getElementById('app-container').addEventListener('keyup', function (e) {
+                if (e.target.classList.contains('edit')){
+                    this.editKeyUp.call(this, e);
+                }
+            }.bind(this));
+            document.getElementById('app-container').addEventListener('focusout', function (e) {
+                if (e.target.classList.contains('edit')){
+                    this.update.call(this, e);
+                }
+            }.bind(this));
+            
+
         }
     }
     App.init();
