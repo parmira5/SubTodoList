@@ -69,6 +69,13 @@
                 subTodo: ''
             });
         },
+
+        destroy: function (element) {
+            this.todos.splice(this.indexFromEl(element), 1);
+            this.render(this.todos);
+
+        },
+        
         buildList: function (todoArray){
             var todos = todoArray;
             var ul = document.createElement('ul');
@@ -94,7 +101,7 @@
         },
 
         edit: function (e) {
-            var liNode = e.target.parentNode.parentNode;
+            var liNode = e.target.closest('li');
             liNode.classList.add('editing');
             var input = liNode.querySelector('input.edit');
             input.focus();  
@@ -115,7 +122,7 @@
 
             }
 
-            if (e.whcih === ESCAPE_KEY) {
+            if (e.which === ESCAPE_KEY) {
 
             }
         },
@@ -130,8 +137,9 @@
         },
 
         indexFromEl: function(el){
-            for (let i = 0; i < this.todos.length; i++){
-                if (this.todos[i].uuid === el.parentNode.getAttribute('data-id')){
+            var liElem = el.closest('li');
+            for (var i = 0; i < this.todos.length; i++){
+                if (this.todos[i].uuid === liElem.getAttribute('data-id')){
                     return i;
                 }
             }
@@ -152,6 +160,11 @@
             document.getElementById('app-container').addEventListener('focusout', function (e) {
                 if (e.target.classList.contains('edit')){
                     this.update.call(this, e);
+                }
+            }.bind(this));
+            document.getElementById('app-container').addEventListener('click', function (e) {
+                if (e.target.classList.contains('delete')){
+                    this.destroy.call(this, e.target);
                 }
             }.bind(this));
         }
