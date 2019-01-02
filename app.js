@@ -50,13 +50,6 @@
                     completed: false,
                     subTodo: ''
                 });
-                this.todos.push({
-                    uuid: util.uuid(),
-                    title: 'Second one for testing.',
-                    level: 0,
-                    completed: false,
-                    subTodo: ''
-                });
             }
             this.render(this.todos);
             this.bindEvents();
@@ -67,6 +60,15 @@
             this.updateDom(builtList);
         },
 
+        create: function (element) {
+            this.todos.splice(this.indexFromEl(element) + 1, 0, {
+                uuid: util.uuid(),
+                title: 'New Task',
+                level: 0,
+                completed: false,
+                subTodo: ''
+            });
+        },
         buildList: function (todoArray){
             var todos = todoArray;
             var ul = document.createElement('ul');
@@ -104,6 +106,9 @@
             
             if (e.which === ENTER_KEY){
                 e.target.blur();
+                this.create(e.target);
+                this.render(this.todos);
+
             }
 
             if (e.which === TAB_KEY) {
@@ -149,8 +154,6 @@
                     this.update.call(this, e);
                 }
             }.bind(this));
-            
-
         }
     }
     App.init();
