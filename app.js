@@ -68,6 +68,8 @@
                 completed: false,
                 subTodo: ''
             });
+
+            this.render(this.todos);
         },
 
         destroy: function (element) {
@@ -111,18 +113,16 @@
 
         editKeyUp: function(e){
             
+            if (e.which === ESCAPE_KEY) {
+                e.target.setAttribute('abort', true);
+                e.target.blur();    
+            }
             if (e.which === ENTER_KEY){
                 e.target.blur();
                 this.create(e.target);
-                this.render(this.todos);
-
             }
 
             if (e.which === TAB_KEY) {
-
-            }
-
-            if (e.which === ESCAPE_KEY) {
 
             }
         },
@@ -131,7 +131,12 @@
             var elem = e.target;
             var value = elem.value.trim();
 
-            this.todos[this.indexFromEl(elem)].title = value;
+            if (elem.getAttribute('abort')){
+                elem.setAttribute('abort', true);
+            } else {
+                this.todos[this.indexFromEl(elem)].title = value;
+            }
+
             this.render(this.todos);
 
         },
