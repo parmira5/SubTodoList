@@ -4,10 +4,6 @@
 // It should discard changes when escape is pressed in edit mode
 // It should mark Todo as complete when mark as complete button is clicked
 // It should toggle between hiding and showing complete
-//
-//
-//
-//
 
 (function (){
     'use strict';
@@ -48,10 +44,11 @@
                     title: 'Double click here to create your first Todo.',
                     level: 0,
                     completed: false,
-                    subTodo: ''
+                    subTodos: []
                 });
             }
             this.render(this.todos);
+            util.store('todos', this.todos);
             this.bindEvents();
         },
 
@@ -60,21 +57,33 @@
             this.updateDom(builtList);
         },
 
-        create: function (element) {
-            this.todos.splice(this.indexFromEl(element) + 1, 0, {
-                uuid: util.uuid(),
-                title: 'New Task',
-                level: 0,
-                completed: false,
-                subTodo: ''
-            });
+        create: function (element, array) {
+            if (arguments.length < 2){
+                this.todos.splice(this.indexFromEl(element) + 1, 0, {
+                    uuid: util.uuid(),
+                    title: 'New Task',
+                    level: 0,
+                    completed: false,
+                    subTodos: []
+                });
+            } else {
+                array.unshift({
+                    uuid: util.uuid(),
+                    title: 'New Task',
+                    level: 0,
+                    completed: false,
+                    subTodos: []
+                });
 
+            }
             this.render(this.todos);
+            util.store('todos', this.todos);
         },
 
         destroy: function (element) {
             this.todos.splice(this.indexFromEl(element), 1);
             this.render(this.todos);
+            util.store('todos', this.todos);
 
         },
         
@@ -82,24 +91,32 @@
             var todos = todoArray;
             var ul = document.createElement('ul');
 
-            todos.forEach(function (element){    
+            todos.forEach(function (element){   
                 var todoLi = document.createElement('li');
+                var subTodos;
                 todoLi.setAttribute('data-id', element.uuid);
+
+                if (element.subTodos.length > 0){
+                    subTodos = App.buildList(element.subTodos);
+                } else {
+                    subTodos = '';
+                }
                 todoLi.innerHTML = `<div class= "view">
                     <input class= "toggle" type= "checkbox">
                     <label>${element.title}</label>
                     <button class="delete">Delete</button>
                 </div>
-                <input class= "edit" value= "${element.title}">`
+                <input class= "edit" value= "${element.title}">
+                ${subTodos}`
                 ul.appendChild(todoLi);
             });
 
-            return ul;
+            return ul.outerHTML;
         },
 
         updateDom: function (list) {
             var container = document.getElementById('app-container');
-            container.innerHTML = list.outerHTML;
+            container.innerHTML = list;
         },
 
         edit: function (e) {
@@ -111,7 +128,7 @@
 
         },
 
-        editKeyUp: function(e){
+        editKeyUp: function(e, array = this.todos){
             
             if (e.which === ESCAPE_KEY) {
                 e.target.setAttribute('abort', true);
@@ -123,7 +140,7 @@
             }
 
             if (e.which === TAB_KEY) {
-
+                this.addSubTodo(e);
             }
         },
 
@@ -138,6 +155,7 @@
             }
 
             this.render(this.todos);
+            util.store('todos', this.todos);
 
         },
 
@@ -150,6 +168,11 @@
             }
         },
 
+        addSubTodo: function (e) {
+            var subTodoArr = this.todos[this.indexFromEl(e.target)].subTodos;
+            this.create(e.target, subTodoArr);
+        },
+
         bindEvents: function() {
             document.getElementById('app-container').addEventListener('dblclick', function (e) {
                 if (e.target.tagName === 'LABEL'){
@@ -157,7 +180,7 @@
                 }
             }.bind(this));
 
-            document.getElementById('app-container').addEventListener('keyup', function (e) {
+            document.getElementById('app-container').addEventListener('keydown', function (e) {
                 if (e.target.classList.contains('edit')){
                     this.editKeyUp.call(this, e);
                 }
