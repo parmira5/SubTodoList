@@ -89,16 +89,3 @@ body{
       display: flex;
       flex-direction: column;
   }
-
-  #app-container ul li .edit {
-    display: none;
-  }
-
-  #app-container ul .editing .view {
-    display: none;
-    color: white;
-  }
-
-  #app-container ul .editing .edit {
-    display: block;
-  } 

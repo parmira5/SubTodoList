@@ -1,12 +1,4 @@
-// It should display a list item that says 'Click here to add your first To-do' when the app loads with nothing in the store. DONE// It should switch to edit mode on a Todo when a user clicks on its text.
-// It should save current Todo and create another Todo bullet at same level when enter key is pressed while in edit mode
-// It should create a sub-Todo under current Todo when tab is pressed in edit mode
-// It should discard changes when escape is pressed in edit mode
-// It should mark Todo as complete when mark as complete button is clicked
-// It should toggle between hiding and showing complete
-
 (function (){
-    'use strict';
     const ENTER_KEY = 13;
     const ESCAPE_KEY = 27;
     const TAB_KEY =  9;
@@ -35,65 +27,35 @@
         }
 
     };
+
     var App = {
         init: function (){
             this.todos = util.store('todos');
             if (this.todos.length === 0){
                 this.todos.push({
                     uuid: util.uuid(),
-                    title: 'Double click here to create your first Todo.',
+                    title: 'Start here',
                     level: 0,
                     completed: false,
                     subTodos: []
                 });
             }
             this.render(this.todos);
-            util.store('todos', this.todos);
             this.bindEvents();
         },
 
-        render: function (todoArray){
-            var builtList = this.buildList(todoArray);
+        render: function (array){
+            builtList = this.buildList(array);
             this.updateDom(builtList);
         },
 
-        create: function (element, array) {
-            if (arguments.length < 2){
-                this.todos.splice(this.indexFromEl(element) + 1, 0, {
-                    uuid: util.uuid(),
-                    title: 'New Task',
-                    level: 0,
-                    completed: false,
-                    subTodos: []
-                });
-            } else {
-                array.unshift({
-                    uuid: util.uuid(),
-                    title: 'New Task',
-                    level: 0,
-                    completed: false,
-                    subTodos: []
-                });
-
-            }
-            this.render(this.todos);
-            util.store('todos', this.todos);
-        },
-
-        destroy: function (element) {
-            this.todos.splice(this.indexFromEl(element), 1);
-            this.render(this.todos);
-            util.store('todos', this.todos);
-
-        },
-        
-        buildList: function (todoArray){
-            var todos = todoArray;
+        buildList: function(array){
             var ul = document.createElement('ul');
+            var todoLi;
+            var subTodos;
 
-            todos.forEach(function (element){   
-                var todoLi = document.createElement('li');
-                var subTodos;
+            array.forEach(function (element){
+                todoLi = document.createElement('li');
                 todoLi.setAttribute('data-id', element.uuid);
 
                 if (element.subTodos.length > 0){
@@ -101,12 +63,11 @@
                 } else {
                     subTodos = '';
                 }
-                todoLi.innerHTML = `<div class= "view">
-                    <input class= "toggle" type= "checkbox">
-                    <label>${element.title}</label>
-                    <button class="delete">Delete</button>
+                todoLi.innerHTML = `<div>
+                <input class= "toggle" type= "checkbox">
+                <input class= "edit" value= ${element.title}>
+                <button class= "delete">X</button>
                 </div>
-                <input class= "edit" value= "${element.title}">
                 ${subTodos}`
                 ul.appendChild(todoLi);
             });
@@ -114,88 +75,92 @@
             return ul.outerHTML;
         },
 
-        updateDom: function (list) {
+        updateDom: function (list){
             var container = document.getElementById('app-container');
             container.innerHTML = list;
         },
 
-        edit: function (e) {
-            var liNode = e.target.closest('li');
-            liNode.classList.add('editing');
-            var input = liNode.querySelector('input.edit');
-            input.focus();  
+        createWithEnter: function(event){
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            var uuid = util.uuid();
 
+            sourceTodo.array.splice(sourceTodo.position + 1, 0, {
+                uuid: uuid,
+                title: 'Double click here to create your first Todo.',
+                level: sourceTodo.todo.level,
+                completed: false,
+                subTodos: []
+            });
 
-        },
-
-        editKeyUp: function(e, array = this.todos){
-            
-            if (e.which === ESCAPE_KEY) {
-                e.target.setAttribute('abort', true);
-                e.target.blur();    
-            }
-            if (e.which === ENTER_KEY){
-                e.target.blur();
-                this.create(e.target);
-            }
-
-            if (e.which === TAB_KEY) {
-                this.addSubTodo(e);
-            }
-        },
-
-        update: function(e){
-            var elem = e.target;
-            var value = elem.value.trim();
-
-            if (elem.getAttribute('abort')){
-                elem.setAttribute('abort', true);
-            } else {
-                this.todos[this.indexFromEl(elem)].title = value;
-            }
-
-            this.render(this.todos);
             util.store('todos', this.todos);
+            this.render(this.todos);
+
+            document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
+        },
+
+        createSubWithTab: function(event){
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            var uuid = util.uuid();
+
+            sourceTodo.todo.subTodos.push({
+                uuid: uuid,
+                title: 'Double click here to create your first Todo.',
+                level: sourceTodo.todo.level + 1,
+                completed: false,
+                subTodos: []
+            });
+
+            util.store('todos', this.todos);
+            this.render(this.todos);
+
+            document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
 
         },
 
-        indexFromEl: function(el){
-            var liElem = el.closest('li');
-            for (var i = 0; i < this.todos.length; i++){
-                if (this.todos[i].uuid === liElem.getAttribute('data-id')){
-                    return i;
+        update: function(event){
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+
+            sourceTodo.array[sourceTodo.position].title = element.value.trim();
+        },
+
+        getTodo: function (element, array){
+            var id = element.closest('li').getAttribute('data-id');
+            for (var i = 0; i < array.length; i++){
+                if (array[i].uuid === id){
+                    return {
+                        todo: array[i],
+                        position: i,
+                        array: array
+                    }
+                } else {
+                    if (array[i].subTodos.length > 0){
+                        var foundInSubTodo = this.getTodo(element, array[i].subTodos);
+                        if (foundInSubTodo){
+                            return foundInSubTodo;
+                        }
+                    }
                 }
+
             }
         },
 
-        addSubTodo: function (e) {
-            var subTodoArr = this.todos[this.indexFromEl(e.target)].subTodos;
-            this.create(e.target, subTodoArr);
-        },
-
-        bindEvents: function() {
-            document.getElementById('app-container').addEventListener('dblclick', function (e) {
-                if (e.target.tagName === 'LABEL'){
-                    this.edit.call(this, e);
-                }
-            }.bind(this));
-
-            document.getElementById('app-container').addEventListener('keydown', function (e) {
-                if (e.target.classList.contains('edit')){
-                    this.editKeyUp.call(this, e);
-                }
-            }.bind(this));
-            document.getElementById('app-container').addEventListener('focusout', function (e) {
-                if (e.target.classList.contains('edit')){
-                    this.update.call(this, e);
-                }
-            }.bind(this));
-            document.getElementById('app-container').addEventListener('click', function (e) {
-                if (e.target.classList.contains('delete')){
-                    this.destroy.call(this, e.target);
+        bindEvents: function(){
+            document.getElementById('app-container').addEventListener('keydown', function(event){
+                if (event.target.classList.contains('edit')){
+                    if(event.which === ENTER_KEY){
+                        this.createWithEnter.call(this, event);
+                    }
+                    if(event.which === TAB_KEY){
+                        event.preventDefault();
+                        this.createSubWithTab.call(this, event);
+                    }
                 }
             }.bind(this));
         }
+
     }
     App.init();
 })();
