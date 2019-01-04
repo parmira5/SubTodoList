@@ -89,3 +89,67 @@ body{
       display: flex;
       flex-direction: column;
   }
+
+  .edit{
+    background-color: lightblue;
+    border: none;
+    font-size: 18px;
+  }
+
+  .delete {
+    background-color: lightblue;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #00bfff;
+  }
+
+  .toggle {
+    border-color: darkblue;
+    background-color: lightblue;
+    color: green;
+  }
+
+  .toggleCheckbox{
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 10px 10px;
+    position: relative;
+    background-color: lightblue;
+  }
+
+  .toggleCheckbox label{
+    cursor: pointer;
+    position: absolute;
+    width: 17px;
+    height: 16px;
+    top: 0;
+    left: 0;
+    background-color: lightblue;
+    border: none;
+  }
+
+  .toggleCheckbox label:after{
+    opacity: 0.2;
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 5px;
+    background: transparent;
+    top: 3px;
+    left: 4px;
+    border: 3px solid #333;
+    border-top: none;
+    border-right: none;
+
+    transform: rotate(-45deg);
+  }
+
+  .toggleCheckbox label:hover::after {
+    opacity: 0.5;
+  }
+
+  .toggleCheckbox input[type=checkbox]:checked{
+  opacity: 1;
+  }

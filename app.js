@@ -34,7 +34,7 @@
             if (this.todos.length === 0){
                 this.todos.push({
                     uuid: util.uuid(),
-                    title: 'Start here',
+                    title: '',
                     level: 0,
                     completed: false,
                     subTodos: []
@@ -64,9 +64,12 @@
                     subTodos = '';
                 }
                 todoLi.innerHTML = `<div>
-                <input class= "toggle" type= "checkbox">
+                <div class= "toggleCheckbox">
+                    <input class= "toggle" type= "checkbox">
+                    <label></label>
+                </div>
                 <input class= "edit" value= ${element.title}>
-                <button class= "delete">X</button>
+                <button class= "delete">&#x2716;</button>
                 </div>
                 ${subTodos}`
                 ul.appendChild(todoLi);
@@ -87,7 +90,7 @@
 
             sourceTodo.array.splice(sourceTodo.position + 1, 0, {
                 uuid: uuid,
-                title: 'Double click here to create your first Todo.',
+                title: '',
                 level: sourceTodo.todo.level,
                 completed: false,
                 subTodos: []
@@ -106,7 +109,7 @@
 
             sourceTodo.todo.subTodos.push({
                 uuid: uuid,
-                title: 'Double click here to create your first Todo.',
+                title: '',
                 level: sourceTodo.todo.level + 1,
                 completed: false,
                 subTodos: []
