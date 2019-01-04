@@ -159,8 +159,22 @@
                     }
                 }
             }.bind(this));
-        }
 
+            document.getElementById('app-container').addEventListener('click', function(event){
+                if (event.target.classList.contains('delete')){
+                    this.destroyWithButton.call(this, event);
+                }
+            }.bind(this));
+        },
+
+        destroyWithButton: function(event){
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            sourceTodo.array.splice(sourceTodo.position, 1);
+
+            util.store('todos', this.todos);
+            this.render(this.todos);
+        }
     }
     App.init();
 })();
