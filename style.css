@@ -101,55 +101,46 @@ body{
     border: none;
     font-size: 14px;
     font-weight: bold;
-    color: #00bfff;
-  }
-
-  .toggle {
-    border-color: darkblue;
-    background-color: lightblue;
-    color: green;
+    color: red;
   }
 
   .toggleCheckbox{
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin: 10px 10px;
+    display: inline;
     position: relative;
-    background-color: lightblue;
+    cursor: pointer;
   }
 
-  .toggleCheckbox label{
+  .toggleCheckbox input {
+    position: relative;
+    opacity: 0;
     cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark{
     position: absolute;
-    width: 17px;
-    height: 16px;
     top: 0;
     left: 0;
-    background-color: lightblue;
-    border: none;
+    height: 20px;
+    width: 20px;
+    background-color: lightblue
   }
 
-  .toggleCheckbox label:after{
-    opacity: 0.2;
+  .checkmark:after{
     content: '';
     position: absolute;
-    width: 9px;
-    height: 5px;
-    background: transparent;
-    top: 3px;
-    left: 4px;
-    border: 3px solid #333;
-    border-top: none;
-    border-right: none;
-
-    transform: rotate(-45deg);
+    left: 7px;
+    top: 2px;
+    width: 4px;
+    height: 10px;
+    border: solid rgb(0, 151, 0, 1.0);
+    border-width: 0px 3px 3px 0px;
+    transform: rotate(45deg);
+    opacity: 0.2;
   }
 
-  .toggleCheckbox label:hover::after {
-    opacity: 0.5;
-  }
-
-  .toggleCheckbox input[type=checkbox]:checked{
-  opacity: 1;
+  .toggleCheckbox input:checked ~ .checkmark:after{
+    display:block;
+    opacity: 1.0;
   }

@@ -64,12 +64,12 @@
                     subTodos = '';
                 }
                 todoLi.innerHTML = `<div>
-                <div class= "toggleCheckbox">
+                <label class= "toggleCheckbox">
                     <input class= "toggle" type= "checkbox">
-                    <label></label>
-                </div>
+                    <span class= "checkmark"></span>
+                </label>
                 <input class= "edit" value= ${element.title}>
-                <button class= "delete">&#x2716;</button>
+                <button class= "delete">&#10005</button>
                 </div>
                 ${subTodos}`
                 ul.appendChild(todoLi);
