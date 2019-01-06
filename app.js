@@ -68,8 +68,8 @@
                     <input class= "toggle" type= "checkbox">
                     <span class= "checkmark"></span>
                 </label>
-                <input class= "edit" value= ${element.title}>
                 <button class= "delete">&#10005</button>
+                <input class= "edit" value= "${element.title}" onfocus = "this.value = this.value">
                 </div>
                 ${subTodos}`
                 ul.appendChild(todoLi);
@@ -125,8 +125,12 @@
         update: function(event){
             var element = event.target;
             var sourceTodo = this.getTodo(element, this.todos);
+            var uuid = sourceTodo.todo.uuid;
 
             sourceTodo.array[sourceTodo.position].title = element.value.trim();
+
+            var input = document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0];
+            input.focus().input.value(input.value());
         },
 
         getTodo: function (element, array){
@@ -160,6 +164,16 @@
                         event.preventDefault();
                         this.createSubWithTab.call(this, event);
                     }
+
+                    if (event.which === ESCAPE_KEY){
+
+                    }
+                }
+            }.bind(this));
+
+            document.getElementById('app-container').addEventListener('keyup', function(event){
+                if (event.which !== ENTER_KEY || event.which !== ESCAPE_KEY || event.which !== TAB_KEY){
+                    this.update.call(this, event);
                 }
             }.bind(this));
 

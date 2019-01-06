@@ -5,6 +5,10 @@ body{
     margin: 0;
 }
 
+input{
+  outline-offset: 0;
+}
+
 #menu {
     display: flex;
     position: relative;
@@ -90,13 +94,22 @@ body{
       flex-direction: column;
   }
 
+  input:focus{
+    outline: none;
+  }
+
   .edit{
+    position: relative;
+    left: 15;
     background-color: lightblue;
     border: none;
     font-size: 18px;
+    width: 600px;
   }
 
   .delete {
+    position: relative;
+    left: 15;
     background-color: lightblue;
     border: none;
     font-size: 14px;
