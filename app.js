@@ -53,6 +53,8 @@
             var ul = document.createElement('ul');
             var todoLi;
             var subTodos;
+            var completeClass = '';
+            var checked = '';
 
             array.forEach(function (element){
                 todoLi = document.createElement('li');
@@ -63,13 +65,22 @@
                 } else {
                     subTodos = '';
                 }
+
+                if (element.completed){
+                    completeClass = 'complete';
+                    checked = 'checked';
+                } else {
+                    completeClass = '';
+                    checked = '';
+                }
+
                 todoLi.innerHTML = `<div>
                 <label class= "toggleCheckbox">
-                    <input class= "toggle" type= "checkbox">
+                    <input class= "toggle" type= "checkbox" ${checked}>
                     <span class= "checkmark"></span>
                 </label>
                 <button class= "delete">&#10005</button>
-                <input class= "edit" value= "${element.title}" onfocus = "this.value = this.value">
+                <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
                 </div>
                 ${subTodos}`
                 ul.appendChild(todoLi);
@@ -130,7 +141,8 @@
             sourceTodo.array[sourceTodo.position].title = element.value.trim();
 
             var input = document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0];
-            input.focus().input.value(input.value());
+            input.focus(); 
+            input.value = input.value;
         },
 
         getTodo: function (element, array){
@@ -181,6 +193,10 @@
                 if (event.target.classList.contains('delete')){
                     this.destroyWithButton.call(this, event);
                 }
+
+                if (event.target.classList.contains('toggle')){
+                    this.toggleComplete.call(this, event);
+                }
             }.bind(this));
         },
 
@@ -191,7 +207,29 @@
 
             util.store('todos', this.todos);
             this.render(this.todos);
+        },
+
+        toggleComplete: function (event, array, completedBool){
+            if (arguments.length === 1){
+                var element = event.target;
+                var sourceTodo = this.getTodo(element, this.todos);
+                completedBool = !sourceTodo.array[sourceTodo.position].completed;
+                sourceTodo.array[sourceTodo.position].completed = completedBool;
+
+                if (sourceTodo.array[sourceTodo.position].subTodos.length > 0){
+                    this.toggleComplete(event, sourceTodo.array[sourceTodo.position].subTodos, completedBool);
+                }
+            } else {
+                for (var i = 0; i < array.length; i++){
+                    array[i].completed = completedBool;
+                    if (array[i].subTodos.length > 0){
+                        this.toggleComplete(event, array[i].subTodos, completedBool);
+                    }
+                }
+            }
+
+            this.render(this.todos);
         }
-    }
+}
     App.init();
 })();

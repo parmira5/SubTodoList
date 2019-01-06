@@ -157,3 +157,9 @@ input{
     display:block;
     opacity: 1.0;
   }
+
+  .complete{
+    color: green;
+    text-decoration: line-through;
+
+  }
