@@ -40,59 +40,99 @@
                     subTodos: []
                 });
             }
-            this.render(this.todos);
+            this.render();
             this.bindEvents();
         },
 
-        render: function (array){
-            builtList = this.buildList(array);
-            this.updateDom(builtList);
+        render: function (){
+            var builtList;
+            var container = document.getElementById('app-container');
+
+            if (document.getElementById('filter-toggle').checked){
+                builtList = this.buildActiveList(this.todos);
+                container.innerHTML = builtList;
+            } else {
+                builtList = this.buildList(this.todos);
+                container.innerHTML = builtList;
+            }
+            
+        },
+
+        buildActiveList: function(array){
+                var ul = document.createElement('ul');
+                var todoLi;
+                var subTodos;
+                var completeClass = '';
+                var checked = '';
+    
+                array.forEach(function (element){
+
+                    if (!element.completed){
+                    todoLi = document.createElement('li');
+                    todoLi.setAttribute('data-id', element.uuid);
+    
+                    if (element.subTodos.length > 0){
+                        subTodos = App.buildActiveList(element.subTodos);
+                    } else {
+                        subTodos = '';
+                    }
+    
+                    todoLi.innerHTML = `<div>
+                    <label class= "toggleCheckbox">
+                        <input class= "toggle" type= "checkbox" ${checked}>
+                        <span class= "checkmark"></span>
+                    </label>
+                    <button class= "delete">&#10005</button>
+                    <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
+                    </div>
+                    ${subTodos}`
+                    ul.appendChild(todoLi);   
+                    }
+                });
+    
+                return ul.outerHTML;
         },
 
         buildList: function(array){
-            var ul = document.createElement('ul');
-            var todoLi;
-            var subTodos;
-            var completeClass = '';
-            var checked = '';
-
-            array.forEach(function (element){
-                todoLi = document.createElement('li');
-                todoLi.setAttribute('data-id', element.uuid);
-
-                if (element.subTodos.length > 0){
-                    subTodos = App.buildList(element.subTodos);
-                } else {
-                    subTodos = '';
-                }
-
-                if (element.completed){
-                    completeClass = 'complete';
-                    checked = 'checked';
-                } else {
-                    completeClass = '';
-                    checked = '';
-                }
-
-                todoLi.innerHTML = `<div>
-                <label class= "toggleCheckbox">
-                    <input class= "toggle" type= "checkbox" ${checked}>
-                    <span class= "checkmark"></span>
-                </label>
-                <button class= "delete">&#10005</button>
-                <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
-                </div>
-                ${subTodos}`
-                ul.appendChild(todoLi);
-            });
-
-            return ul.outerHTML;
+                var ul = document.createElement('ul');
+                var todoLi;
+                var subTodos;
+                var completeClass = '';
+                var checked = '';
+    
+                array.forEach(function (element){
+                    todoLi = document.createElement('li');
+                    todoLi.setAttribute('data-id', element.uuid);
+    
+                    if (element.subTodos.length > 0){
+                        subTodos = App.buildList(element.subTodos);
+                    } else {
+                        subTodos = '';
+                    }
+    
+                    if (element.completed){
+                        completeClass = 'complete';
+                        checked = 'checked';
+                    } else {
+                        completeClass = '';
+                        checked = '';
+                    }
+    
+                    todoLi.innerHTML = `<div>
+                    <label class= "toggleCheckbox">
+                        <input class= "toggle" type= "checkbox" ${checked}>
+                        <span class= "checkmark"></span>
+                    </label>
+                    <button class= "delete">&#10005</button>
+                    <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
+                    </div>
+                    ${subTodos}`
+                    ul.appendChild(todoLi);
+                });
+    
+                return ul.outerHTML;
         },
 
-        updateDom: function (list){
-            var container = document.getElementById('app-container');
-            container.innerHTML = list;
-        },
 
         createWithEnter: function(event){
             var element = event.target;
@@ -108,7 +148,7 @@
             });
 
             util.store('todos', this.todos);
-            this.render(this.todos);
+            this.render();
 
             document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
         },
@@ -127,7 +167,7 @@
             });
 
             util.store('todos', this.todos);
-            this.render(this.todos);
+            this.render();
 
             document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
 
@@ -198,6 +238,10 @@
                     this.toggleComplete.call(this, event);
                 }
             }.bind(this));
+
+            document.getElementById('filter-toggle').addEventListener('change', function(){
+                this.render(this.todos);
+            }.bind(this));
         },
 
         destroyWithButton: function(event){
@@ -206,7 +250,7 @@
             sourceTodo.array.splice(sourceTodo.position, 1);
 
             util.store('todos', this.todos);
-            this.render(this.todos);
+            this.render();
         },
 
         toggleComplete: function (event, array, completedBool){
@@ -228,7 +272,7 @@
                 }
             }
 
-            this.render(this.todos);
+            this.render();
         }
 }
     App.init();
