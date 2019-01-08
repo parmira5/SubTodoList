@@ -138,39 +138,51 @@
             var element = event.target;
             var sourceTodo = this.getTodo(element, this.todos);
             var uuid = util.uuid();
+            var val = element.value;
 
-            sourceTodo.array.splice(sourceTodo.position + 1, 0, {
-                uuid: uuid,
-                title: '',
-                level: sourceTodo.todo.level,
-                completed: false,
-                subTodos: []
-            });
-
-            util.store('todos', this.todos);
-            this.render();
-
-            document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
+            if (val){
+                sourceTodo.array.splice(sourceTodo.position + 1, 0, {
+                    uuid: uuid,
+                    title: '',
+                    level: sourceTodo.todo.level,
+                    completed: false,
+                    subTodos: []
+                });
+    
+                element.blur();
+    
+                util.store('todos', this.todos);
+                this.render();
+    
+                document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
+            }
         },
 
         createSubWithTab: function(event){
+
             var element = event.target;
-            var sourceTodo = this.getTodo(element, this.todos);
-            var uuid = util.uuid();
+            var val = element.value;
 
-            sourceTodo.todo.subTodos.push({
-                uuid: uuid,
-                title: '',
-                level: sourceTodo.todo.level + 1,
-                completed: false,
-                subTodos: []
-            });
-
-            util.store('todos', this.todos);
-            this.render();
-
-            document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
-
+            if (val){
+                var sourceTodo = this.getTodo(element, this.todos);
+                var uuid = util.uuid();
+    
+                sourceTodo.todo.subTodos.push({
+                    uuid: uuid,
+                    title: '',
+                    level: sourceTodo.todo.level + 1,
+                    completed: false,
+                    subTodos: []
+                });
+    
+                element.blur();
+    
+                util.store('todos', this.todos);
+                this.render();
+    
+                document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
+            }
+            
         },
 
         update: function(event){
@@ -178,11 +190,35 @@
             var sourceTodo = this.getTodo(element, this.todos);
             var uuid = sourceTodo.todo.uuid;
 
-            sourceTodo.array[sourceTodo.position].title = element.value.trim();
+            if (element.getAttribute('abort') == 'true'){
+                if (element.value.trim()){
+                    element.setAttribute('abort', false);
+                    element.focus();
+                } else {
+                    this.destroyWithButton(event);
+                }
+            } else {
+                if (element.value.trim()){
+                    sourceTodo.array[sourceTodo.position].title = element.value.trim();
+                }
+            }
+            this.render();
+        },
 
-            var input = document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0];
-            input.focus(); 
-            input.value = input.value;
+        editKeyUp: function(event){
+            if (event.which === ENTER_KEY){
+                this.createWithEnter(event);
+            }
+
+            if (event.which === TAB_KEY){
+                event.preventDefault();
+                this.createSubWithTab(event);
+            }
+
+            if (event.which === ESCAPE_KEY){
+                event.target.setAttribute('abort', true);
+                this.update(event);
+            }
         },
 
         getTodo: function (element, array){
@@ -206,27 +242,15 @@
             }
         },
 
+
         bindEvents: function(){
+
             document.getElementById('app-container').addEventListener('keydown', function(event){
-                if (event.target.classList.contains('edit')){
-                    if(event.which === ENTER_KEY){
-                        this.createWithEnter.call(this, event);
-                    }
-                    if(event.which === TAB_KEY){
-                        event.preventDefault();
-                        this.createSubWithTab.call(this, event);
-                    }
-
-                    if (event.which === ESCAPE_KEY){
-
-                    }
-                }
+                this.editKeyUp.call(this, event);
             }.bind(this));
 
-            document.getElementById('app-container').addEventListener('keyup', function(event){
-                if (event.which !== ENTER_KEY || event.which !== ESCAPE_KEY || event.which !== TAB_KEY){
-                    this.update.call(this, event);
-                }
+            document.getElementById('app-container').addEventListener('focusout', function(event){
+                this.update.call(this, event);
             }.bind(this));
 
             document.getElementById('app-container').addEventListener('click', function(event){
@@ -271,7 +295,6 @@
                     }
                 }
             }
-
             this.render();
         }
 }
