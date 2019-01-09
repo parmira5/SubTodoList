@@ -46,14 +46,15 @@
 
         render: function (){
             var builtList;
-            var container = document.getElementById('app-container');
 
             if (document.getElementById('filter-toggle').checked){
                 builtList = this.buildActiveList(this.todos);
-                container.innerHTML = builtList;
+                document.getElementById('app-container').innerHTML = builtList;
             } else {
                 builtList = this.buildList(this.todos);
-                container.innerHTML = builtList;
+                document.getElementById('app-container').innerHTML = '';
+                document.getElementById('app-container').innerHTML = builtList;
+
             }
             
         },
@@ -133,6 +134,18 @@
                 return ul.outerHTML;
         },
 
+        getPrevElement: function(event){
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            var prevElement = sourceTodo.array[sourceTodo.position - 1];
+            
+            if (prevElement){
+                return prevElement
+            } else {
+                return null;
+            }
+        },
+
 
         createWithEnter: function(event){
             var element = event.target;
@@ -160,27 +173,43 @@
 
         createSubWithTab: function(event){
 
-            var element = event.target;
-            var val = element.value;
+            // var element = event.target;
+            // var val = element.value;
 
-            if (val){
-                var sourceTodo = this.getTodo(element, this.todos);
-                var uuid = util.uuid();
+            // if (val){
+            //     var sourceTodo = this.getTodo(element, this.todos);
+            //     var uuid = util.uuid();
     
-                sourceTodo.todo.subTodos.push({
-                    uuid: uuid,
-                    title: '',
-                    level: sourceTodo.todo.level + 1,
-                    completed: false,
-                    subTodos: []
-                });
+            //     sourceTodo.todo.subTodos.push({
+            //         uuid: uuid,
+            //         title: '',
+            //         level: sourceTodo.todo.level + 1,
+            //         completed: false,
+            //         subTodos: []
+            //     });
     
-                element.blur();
+            //     element.blur();
     
+            //     util.store('todos', this.todos);
+            //     this.render();
+    
+            //     document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
+            // }
+
+            var prevElement = this.getPrevElement(event);
+
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            var movedTodo;
+
+            if (prevElement) {
+                sourceTodo.todo.level = prevElement.level + 1;
+                movedTodo = JSON.parse(JSON.stringify(sourceTodo.todo));
+                this.destroyWithButton(event);
+                prevElement.subTodos.push(movedTodo);
+
                 util.store('todos', this.todos);
                 this.render();
-    
-                document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
             }
             
         },
@@ -200,9 +229,9 @@
             } else {
                 if (element.value.trim()){
                     sourceTodo.array[sourceTodo.position].title = element.value.trim();
+                    this.render();
                 }
             }
-            this.render();
         },
 
         editKeyUp: function(event){
@@ -250,7 +279,9 @@
             }.bind(this));
 
             document.getElementById('app-container').addEventListener('focusout', function(event){
-                this.update.call(this, event);
+                if (event.which !== ESCAPE_KEY){
+                    this.update.call(this, event);
+                }
             }.bind(this));
 
             document.getElementById('app-container').addEventListener('click', function(event){
