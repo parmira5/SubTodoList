@@ -161,5 +161,8 @@ input{
   .complete{
     color: green;
     text-decoration: line-through;
+  }
 
+  .switch label {
+    position: relative;
   }
