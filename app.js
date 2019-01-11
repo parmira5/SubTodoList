@@ -84,7 +84,7 @@
                         <span class= "checkmark"></span>
                     </label>
                     <button class= "delete">&#10005</button>
-                    <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
+                    <input class= "edit ${completeClass}" value= "${element.title}">
                     </div>
                     ${subTodos}`
                     ul.appendChild(todoLi);   
@@ -125,7 +125,7 @@
                         <span class= "checkmark"></span>
                     </label>
                     <button class= "delete">&#10005</button>
-                    <input class= "edit ${completeClass}" value= "${element.title}" onfocus = "this.value = this.value">
+                    <input class= "edit ${completeClass}" value= "${element.title}">
                     </div>
                     ${subTodos}`
                     ul.appendChild(todoLi);
@@ -141,6 +141,16 @@
             
             if (prevElement){
                 return prevElement
+            } else {
+                return null;
+            }
+        },
+
+        getParentElement: function(element, array){
+            var parentElement = element.closest('li').closest('ul').closest('li');
+            var parentTodo = this.getTodo(parentElement, array);
+            if (parentTodo){
+                return parentTodo;
             } else {
                 return null;
             }
@@ -172,29 +182,7 @@
         },
 
         createSubWithTab: function(event){
-
-            // var element = event.target;
-            // var val = element.value;
-
-            // if (val){
-            //     var sourceTodo = this.getTodo(element, this.todos);
-            //     var uuid = util.uuid();
-    
-            //     sourceTodo.todo.subTodos.push({
-            //         uuid: uuid,
-            //         title: '',
-            //         level: sourceTodo.todo.level + 1,
-            //         completed: false,
-            //         subTodos: []
-            //     });
-    
-            //     element.blur();
-    
-            //     util.store('todos', this.todos);
-            //     this.render();
-    
-            //     document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0].focus();
-            // }
+            this.update(event);
 
             var prevElement = this.getPrevElement(event);
 
@@ -207,29 +195,63 @@
                 movedTodo = JSON.parse(JSON.stringify(sourceTodo.todo));
                 this.destroyWithButton(event);
                 prevElement.subTodos.push(movedTodo);
+                var uuid = prevElement.subTodos[prevElement.subTodos.indexOf(movedTodo)].uuid;
 
                 util.store('todos', this.todos);
                 this.render();
+                var input = document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0];
+                input.focus();
+                var temp = input.value;
+                input.value = '';
+                input.value = temp;
+
             }
             
+        },
+
+        promoteTask: function(event){
+            this.update(event);
+            var element = event.target;
+            var sourceTodo = this.getTodo(element, this.todos);
+            var parentTodo = this.getParentElement(element, this.todos)
+            var movedTodo;
+
+            if (parentTodo){
+                sourceTodo.todo.level = parentTodo.todo.level;
+                movedTodo = JSON.parse(JSON.stringify(sourceTodo.todo));
+                this.destroyWithButton(event);
+                parentTodo.array.splice(parentTodo.position + 1, 0, movedTodo);
+                var uuid = parentTodo.array[parentTodo.array.indexOf(movedTodo)].uuid;
+                util.store('todos', this.todos);
+                this.render();
+                var input = document.querySelector(`[data-id="${uuid}"]`).childNodes[0].getElementsByClassName('edit')[0];
+                input.focus();
+                var temp = input.value;
+                input.value = '';
+                input.value = temp;
+            }
         },
 
         update: function(event){
             var element = event.target;
             var sourceTodo = this.getTodo(element, this.todos);
-            var uuid = sourceTodo.todo.uuid;
 
-            if (element.getAttribute('abort') == 'true'){
-                if (element.value.trim()){
-                    element.setAttribute('abort', false);
-                    element.focus();
+            if (sourceTodo){
+                var uuid = sourceTodo.todo.uuid;
+
+                if (element.getAttribute('abort') == 'true'){
+                    if (element.value.trim()){
+                        element.value = sourceTodo.todo.title;
+                        element.setAttribute('abort', false);
+                        element.focus();
+                    } else {
+                        this.destroyWithButton(event);
+                    }
                 } else {
-                    this.destroyWithButton(event);
-                }
-            } else {
-                if (element.value.trim()){
-                    sourceTodo.array[sourceTodo.position].title = element.value.trim();
-                    this.render();
+                    if (element.value.trim()){
+                        sourceTodo.array[sourceTodo.position].title = element.value.trim();
+                        this.render();
+                    }
                 }
             }
         },
@@ -240,8 +262,13 @@
             }
 
             if (event.which === TAB_KEY){
-                event.preventDefault();
-                this.createSubWithTab(event);
+                if (event.shiftKey){
+                    event.preventDefault();
+                    this.promoteTask(event);
+                } else {
+                    event.preventDefault();
+                    this.createSubWithTab(event);
+                }
             }
 
             if (event.which === ESCAPE_KEY){
@@ -251,23 +278,26 @@
         },
 
         getTodo: function (element, array){
+            if (element){
             var id = element.closest('li').getAttribute('data-id');
-            for (var i = 0; i < array.length; i++){
-                if (array[i].uuid === id){
-                    return {
-                        todo: array[i],
-                        position: i,
-                        array: array
-                    }
-                } else {
-                    if (array[i].subTodos.length > 0){
-                        var foundInSubTodo = this.getTodo(element, array[i].subTodos);
-                        if (foundInSubTodo){
-                            return foundInSubTodo;
+                for (var i = 0; i < array.length; i++){
+                    if (array[i].uuid === id){
+                        return {
+                            todo: array[i],
+                            position: i,
+                            array: array
+                        }
+                    } else {
+                        if (array[i].subTodos.length > 0){
+                            var foundInSubTodo = this.getTodo(element, array[i].subTodos);
+                            if (foundInSubTodo){
+                                return foundInSubTodo;
+                            }
                         }
                     }
                 }
-
+            } else {
+                return null;
             }
         },
 
@@ -279,7 +309,8 @@
             }.bind(this));
 
             document.getElementById('app-container').addEventListener('focusout', function(event){
-                if (event.which !== ESCAPE_KEY){
+
+                if (event.target.classList.contains('edit')){
                     this.update.call(this, event);
                 }
             }.bind(this));
