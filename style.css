@@ -25,6 +25,15 @@ input{
     color: lightskyblue;
 }
 
+.switch-container{
+  align-self: center;
+}
+
+#switch-id{
+  position: relative;
+  right: 5vw;
+}
+
 .switch {
     position: relative;
     right: 5vw;
